@@ -1,0 +1,253 @@
+\newif\ifpreprint
+ 
+%Preprint/reprint switch
+\preprinttrue % Enable for single column preprint
+%\preprintfalse % Enable for double column reprint
+  
+\ifpreprint
+\documentclass[journal=jctcce,manuscript=article]{achemso}
+\else
+\documentclass[journal=jctcce,manuscript=article,layout=twocolumn]{achemso}
+\fi
+
+\usepackage[T1]{fontenc} % Use modern font encodings
+
+\usepackage{amsmath}
+\usepackage{newtxtext,newtxmath}
+
+
+\usepackage{graphicx}
+\usepackage{dcolumn}
+\usepackage{braket}
+\usepackage{multirow}
+\usepackage{threeparttable}
+\usepackage{xspace}
+\usepackage{verbatim}
+\usepackage[version=4]{mhchem} % Formula subscripts using \ce{}
+\usepackage{comment}
+\usepackage{color,soul}
+
+\usepackage{mathtools}
+\usepackage{xcolor}
+\usepackage{xspace}
+\usepackage{ifthen}
+
+\usepackage{qcircuit}
+\usepackage{booktabs,caption}
+
+\newcommand*{\Eh}{$E_{\rm h}$\xspace}
+\newcommand*{\Ecorr}{$E_{\rm{corr}}$\xspace}
+\newcommand*{\RCMnorm}{$\norm{\pmb{\lambda}_{2}}^{2}_{F}$\xspace}
+\newcommand*{\dRCMnorm}{$\norm{\pmb{\delta\lambda}_{2}}^{2}_{F}$\xspace}
+\newcommand{\basis}[2]{\psi_{#1}^{({#2})}\xspace}
+\newcommand{\familyabbr}[0]{QSD\xspace}
+\newcommand{\familyname}[0]{Quantum Subspace Diagonalization\xspace}
+\newcommand{\methodname}[0]{multireference selected quantum Krylov\xspace}
+\newcommand{\methodabbr}[0]{MRSQK\xspace}
+% the next two go together
+\newcommand{\controlop}[1]{\mathrm{c}\mhyphen{#1}}
+\mathchardef\mhyphen="2D
+
+\providecommand{\norm}[1]{\lVert#1\rVert}
+
+\usepackage[colorlinks = true,
+            linkcolor = blue,
+            urlcolor  = black,
+            citecolor = blue,
+            anchorcolor = black]{hyperref}
+
+%\usepackage{lineno}
+%\modulolinenumbers[5]
+%\ifpreprint
+%\setlength\linenumbersep{24pt}
+%\else
+%\setlength\linenumbersep{6pt}
+%\fi
+%\linenumbers
+
+\definecolor{goodorange}{RGB}{225,125,0}
+\definecolor{goodgreen}{RGB}{5,130,5}
+\definecolor{goodred}{RGB}{220,50,25}
+\definecolor{goodblue}{RGB}{30,144,255}
+\definecolor{OliveGreen}{RGB}{5,100,5}
+
+
+\usepackage{titlesec}
+%\usepackage{footnote}
+%
+\let\titlefont\undefined
+\usepackage[fontsize=11pt]{scrextend}
+\captionsetup{font={sf,footnotesize}}
+%
+\titleformat{\section}
+{\normalfont\sffamily\bfseries\color{OliveGreen}}
+{\thesection.}{0.25em}{\uppercase}
+
+\titleformat{\subsection}[runin]
+{\normalfont\sffamily\bfseries}
+{\thesubsection}{0.25em}{}[.\;\;]
+
+\titleformat{\suppinfo}
+{\normalfont\sffamily\bfseries}
+{\thesubsection}{0.25em}{}
+
+
+\titlespacing*{\section}{0pt}{0.5\baselineskip}{0.01\baselineskip}
+\titlespacing*{\subsection}{0pt}{0.125\baselineskip}{0.01\baselineskip}
+
+\renewcommand{\refname}{\normalfont\sffamily\bfseries\color{OliveGreen}{\normalsize  REFERENCES}} 
+
+
+
+\author{Renke Huang}
+\email{renke.huang@emory.edu}
+\affiliation{Department of Chemistry and Cherry Emerson Center for Scientific Computation, Emory University, Atlanta, GA, 30322}
+
+\setlength{\bibsep}{0pt plus 0.3ex}
+
+% bibliography print title or not
+%\setkeys{acs}{usetitle=true}
+
+
+\let\oldmaketitle\maketitle
+\let\maketitle\relax
+
+\title{Ordering of Trotterization and Resource Estimation for Multireference Quantum Krylov Algorithm }
+
+% \date{\today}
+
+\begin{document}
+
+%\oldmaketitle
+
+%\begin{abstract}
+
+%\end{abstract}
+
+\section{Introduction}
+
+Simulating fermions whose interactions display strong correlation effects on classical computers is plagued by the computational difficulties from the exponential growth of many-body Hilbert space dimension.\cite{Laughlin:2000br} 
+This problem motivated the original idea of quantum computing.\cite{Feynman:1982gn, manin1980computable} 
+The past decade has witnessed the milestone achieved in the hardware development of the quantum computer,\cite{Arute:2019fg} so it has become crucial to realize useful applications to demonstrate the potential it promises. Current noisy intermediate-scale quantum (NISQ) devices,\cite{Preskill:2018gt} characterized by 50 to several hundred qubits and low gate fidelity, limit the depth and width of quantum circuits that can be executed with sufficient confidence, which puts many constraints on the design of algorithms for quantum simulation.
+
+Quantum computers have a prominent advantage for simulating quantum dynamics, the unitary time evolution of a highly-entangled state.\cite{Kassal:2008bf}
+The quantum algorithm combining unitary evolution and phase estimation, termed QPE, was the first to manifest the exponential speedup in solving the eigenvalue problem of a local hamiltonian,\cite{Abrams:1997ha, Abrams:1999ur} and adapted for fermionic simulations.\cite{Ortiz:2001jn} 
+Then QPE was applied to small molecules for calculating the ground-state energy,\cite{AspuruGuzik:dj} and later the complete spectrum on photonic hardware.\cite{Lanyon:2010jf}
+However, for medium to large systems of chemical interest, such as FeMoco, the transition metal center in a nitrogenase enzyme, an estimate of circuit depth and coherence time needed for QPE is far beyond the reach of NISQ devices.\cite{Reiher:2017cv}
+Promising alternatives tailored for the existing or near-term noisy hardware are hybrid quantum-classical algorithms, of which two major schemes are the variational quantum eigensolver (VQE)\cite{Peruzzo:2014kc, Yung:2014iv, McClean:2015bs} and the quantum approximate optimization algorithm (QAOA)\cite{Farhi:2014wl}  
+
+The VQE algorithm leverages the quantum computer only for the classically intractable task, namely, preparing an entangled quantum state by a parametrized circuit termed the ansatz, and obtaining the energy expectation from statistics of repetitive measurements of the state.\cite{McClean:2015bs}
+Then, a classical optimizer minimizes the energy and updates parameters iteratively. In this way, the VQE trades a polynomial overhead of measurements and classical optimization for a much shorter coherence time and a reduction of the circuit depth.\cite{McArdle:2019we}
+The most important wavefunction ansatz in the VQE scheme is the unitary coupled cluster truncated at single and double excitations (UCCSD),\cite{McClean:2015bs, OMalley:2016dc, Barkoutsos:2018hm, Romero:2019hk} which is inspired by efforts in improving classical coupled cluster theory.\cite{bartlett1989alternative, kutzelnigg1991error, Szalay:1995vu, Taube:2006bi, Cooper:2010ck, Evangelista:2011eh, Harsha:2018dv}
+Several variants of UCCSD ansatz have been explored, including k-UpCCGSD approach which utilizes generalized singles and doubles,\cite{Lee:2018cy} qubit UCC constructed directly from entangler gates\cite{Ryabinkin:2018jw} with qubit mean-field reference,\cite{Ryabinkin:2018tv} Bogoliubov UCC using fermionic Gaussian state reference,\cite{DallaireDemers:2019iw} compact UCC with gradient-selected unitaries\cite{Grimsley:2019ed} and its two-qubit-gate-efficient variant\cite{Tang:2019ug}.
+Other alternatives, primarily, hardware-efficient ansatzes that only use the set of gates easily implementable on NISQ devices\cite{Kandala:2017gh, M:2019hw, Rattew:2019wv} also gain attention because of much shallower circuits.
+The VQE scheme has also been extended to compute excited-state properties,\cite{McClean:2017ct, Higgott:2018fca, Colless:2018hp, Parrish:2019bw, Nakanishi:2019wo, Jouzdani:2019tp, GreeneDiniz:2019tg, Tilly:2020tj} or combined with QPE to reduce the measurement cost.\cite{Wang:2019ha, Santagati:2018ih}
+While VQE experiments have been realized on various hardware architectures,\cite{Peruzzo:2014kc, Yung:2014iv,OMalley:2016dc, Hempel:2018to,Colless:2018hp, Santagati:2018ih, Shen:2017cc, M:2019hw} multiple challenges nonetheless remain in practice $-$ the difficulty of high-dimensional classical optimization of the energy,\cite{McClean:2018kf} a large number of measurements required for converging the expectation value to high precision\cite{Barkoutsos:2019wq} and intrinsic accuracy limit from the inexact ansatz.\cite{Evangelista:2019kz}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Results and Discussion}
+
+
+\subsection{Ordering of Pauli terms after Trotterization}
+
+Different ordering of Pauli terms are tested.
+Chemical accuracy can be achieved using a Trotter number of 4 and 20 Krylov basis states.
+
+
+%%%%% Table for showing good performance even with Trotter approximation %%%%%
+\begin{table*}[!ht]
+\centering
+\renewcommand{\arraystretch}{1.1}
+\caption{Ground-state energies (in \Eh) of \ce{H6} at a bond distance of 1.5~\AA{}. \methodabbr results are given for $N = d (s+1)$ Krylov basis states using three steps ($s = 3$) and $\Delta t = 0.5$ a.u.
+The quantity $m$ indicates the Trotter number.
+Subscripts denote different ordering type of Pauli terms in the qubit Hamiltonian after the Trotterization. 
+\textbf{OF}: OpenFermion's default QubitOperator ordering; 
+\textbf{JW-d}: terms are sorted in the descending order based on the magnitude of coefficients after Jordan-Wigner transform (Pauli term with largest magnitude goes first);
+\textbf{SQ-d}: terms are sorted in the descending order based on the magnitudes of amplitudes of fermion operators in the second quantized form of the Hamiltonian (the group of terms from the fermion operator with the largest amplitude go first).
+\textbf{rand}: pauli terms are shuffled randomly after Jordan-Wigner transform.
+}
+\footnotesize
+\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}*{1}{r}*{8}{r}@{}}    %9: means 9 columns for right ones
+%\begin{tabular*}{\columnwidth}{| c | c | c | c | c | c | c |}    % \stretch{0.4}
+
+ \hline
+ \toprule
+     $N$    &    $E^{(m=1)}_{\rm{OF}}$    &    $E^{(m=1)}_{\rm{JW-d}}$    &    $E^{(m=1)}_{\rm{SQ-d}}$    &    $E^{(m=1)}_{\rm{rand}}$     &     $E^{(m=2)}_{\rm{OF}}$    &    $E^{(m=2)}_{\rm{JW-d}}$     &   $E^{(m=2)}_{\rm{SQ-d}}$    &     $E^{(m=2)}_{\rm{rand}}$       \\
+\midrule
+    4    &    $-$2.982186    &    $-$2.988497   &   $-$2.988691   &   $-$2.982186   &    $-$2.998858   &    $-$3.001573    &  $-$3.002303    &   $-$2.998858  \\
+    8    &    $-$3.001195	  &    $-$3.010441   &   $-$3.010010   &   $-$3.001195   &    $-$3.010035   &    $-$3.014902     &  $-$3.015058   &   $-$3.010035  \\	
+  12    &    $-$3.008661	  &    $-$3.010831   &   $-$3.010532   &   $-$3.008661   &    $-$3.013425   &    $-$3.015151   &   $-$3.015306    &   $-$3.013425  \\
+  16    &    $-$3.010543	  &    $-$3.011343   &   $-$3.011179   &   $-$3.010543   &    $-$3.014253   &    $-$3.015388   &   $-$3.015527    &   $-$ 3.014253  \\
+  20    &    $-$3.011663    &    $-$3.016956   &   $-$3.017073   &    $-$3.011663  &    $-$3.015311   &    $-$3.018432   &    $-$3.018505   &    $-$3.015311  \\
+\hline
+\toprule
+  $N$    &     $E^{(m=4)}_{\rm{OF}}$    &   $E^{(m=4)}_{\rm{JW-d}}$    &   $E^{(m=4)}_{\rm{SQ-d}}$   &   $E^{(m=4)}_{\rm{rand}}$   &     $E^{(m=8)}_{\rm{OF}}$    &   $E^{(m=8)}_{\rm{JW-d}}$    &   $E^{(m=8)}_{\rm{SQ-d}}$   &   $E^{(m=8)}_{\rm{rand}}$   \\
+  \midrule
+  4      &   $-$3.009948   &    $-$3.009826    &    $-$3.010353   &   $-$3.009948      &   $-$3.014138    &   $-$3.013367    &   $-$3.013629    &   $-$3.014138  \\
+  8      &   $-$3.015872   &    $-$3.017784    &    $-$3.017966   &   $-$3.015872      &   $-$3.018341    &   $-$3.018880    &   $-$3.018970    &   $-$3.018341  \\
+  12    &   $-$3.016940   &    $-$3.017891    &   $-$3.018062    &   $-$3.016940      &   $-$3.018808    &   $-$3.018956    &   $-$3.019039    &   $-$3.018808  \\
+  16    &   $-$3.017173   &    $-$3.017980    &   $-$3.018152    &   $-$3.017173      &   $-$3.018888    &   $-$3.019012    &   $-$3.019105    &   $-$3.018888  \\ 
+  20    &    $-$3.017614  &    $-$3.019231    &   $-$3.019280    &   $-$3.017614     &    $-$3.019054   &    $-$3.019669   &    $-$3.019710     &    $-$3.019054   \\[3pt]
+  
+~~~FCI       &  $-$3.020198    &   \textit{c.a. thres.}      &    $-$3.019198    \\% chemical accuracy
+\bottomrule
+\hline
+
+\end{tabular*}
+\label{table_GSE}
+\end{table*}
+
+
+\begin{table*}[!ht]
+\centering
+\renewcommand{\arraystretch}{1.1}
+\caption{First excited energies (in \Eh) of \ce{H6} at a bond distance of 1.5~\AA{}. \methodabbr results are given for $N = d (s+1)$ Krylov basis states using three steps ($s = 3$) and $\Delta t = 0.5$ a.u.
+The quantity $m$ indicates the Trotter number.
+Subscripts denote the ordering type after the Trotterization. }
+\footnotesize
+\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}*{1}{r}*{9}{r}@{}}    %9: means 9 columns for right ones
+%\begin{tabular*}{\columnwidth}{| c | c | c | c | c | c | c |}    % \stretch{0.4}
+%\hline
+
+ \toprule
+     $N$    &    $E^{(m=1)}_{\rm{OF}}$    &    $E^{(m=1)}_{\rm{JW-d}}$    &    $E^{(m=1)}_{\rm{FA-d}}$    &    $E^{(m=2)}_{\rm{OF}}$    &    $E^{(m=2)}_{\rm{JW-d}}$     &   $E^{(m=2)}_{\rm{FA-d}}$    &     $E^{(m=4)}_{\rm{OF}}$    &   $E^{(m=4)}_{\rm{JW-d}}$    &   $E^{(m=4)}_{\rm{FA-d}}$  \\
+ \midrule
+    
+    
+FCI       &  $-$2.889922    &       \\
+\bottomrule
+
+\end{tabular*}
+\label{table_1ESE}
+\end{table*}
+
+
+
+
+\section{Conclusion}
+
+
+
+\section{Future Work}
+
+
+
+
+\newpage
+\bibliographystyle{achemso}
+\bibliography{bibs/jan20export.bib,bibs/extra.bib,bibs/qkdrefs.bib}{}
+
+\end{document}
+
