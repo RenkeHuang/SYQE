@@ -162,8 +162,8 @@ While we utilized the same strategy to produce basis states from a single refere
 
 
 %%%%%%%%%%%%%%%%%
-\section{Theory}
-
+%\section{Theory}
+\section{Results and Discussion}
 
 \subsection{Basis in \methodabbr}
 
@@ -196,7 +196,6 @@ Based on Eq. \ref{trial_gs}, the probability of measuring the determinant $\ket{
 $\ket{\widetilde{\Psi}_{0}}$ can also be written in a compact way as the Hadamard product\cite{horn2012matrix} (element-wise multiplication) of three vectors $\ket{\widetilde{\Psi}_{0}} = \sum_{k} \mathbf{C_{0}}  \circ  \mathbf{C_{k }}   \circ \,  \vec{\mu}$,
 where $\vec{\mu}$ comprises all the n-qubit computational basis states $\vec{\mu} = (\ket{0}, \ket{1}, ... ,\ket{2^{n}-1})$.
 
-
 The coefficient vector $\mathbf{C_{0}} = (C_{00}, C_{01}, ... , C_{0s^{\prime}} )$ is obtained by solving the generalized eigenvalue problem,
 \begin{equation}
 \label{ge}
@@ -205,13 +204,9 @@ The coefficient vector $\mathbf{C_{0}} = (C_{00}, C_{01}, ... , C_{0s^{\prime}} 
 with matrix elements given by 
 $S_{\alpha \beta} = \bra{\Phi_0} e^{i \alpha \Delta t \hat{H}} e^{-i \beta \Delta t \hat{H}} \ket{\Phi_0} $,
 $\ H_{\alpha \beta} = \bra{\Phi_0} e^{i \alpha \Delta t \hat{H}}  \hat{H}   e^{-i \beta \Delta t \hat{H}}  \ket{\Phi_0}$,
-%\begin{align}
-%S_{\alpha \beta} &= \bra{\Phi_0} e^{i \alpha \Delta t H} e^{-i \beta \Delta t H} \ket{\Phi_0}, \\
-%H_{\alpha \beta} &= \bra{\Phi_0} e^{i \alpha \Delta t H} \hat{H} e^{-i \beta \Delta t H} \ket{\Phi_0}
-%\end{align}
 where $\alpha, \beta \in [0,1,...,s^{\prime}]$. $\mathbf{C_{0}}$ is the eigenvector corresponding to the lowest eigenvalue.
 
-$\mathbf{C_{k }}$ is the state vector of the quantum state $\ket{k} = e^{-i k \Delta t \hat{H}} \ket{\Phi_0} = \sum_{\mu} C_{k \mu} \ket{\mu}$, which can be simulated classically (e.g. statevector simulator in the \textsc{Qiskit-Aer}\cite{Qiskit} package). However, in real experiments, the state vector cannot be directly read out from the quantum computer. 
+$\mathbf{C_{k }}$ is the state vector of the quantum state $\ket{k} = e^{-i k \Delta t \hat{H}} \ket{\Phi_0} = \sum_{\mu} C_{k \mu} \ket{\mu}$, which can be simulated classically (e.g. statevector simulator in the \texttt{Qiskit-Aer}\cite{Qiskit} package). However, in real experiments, the state vector cannot be directly read out from the quantum computer. 
 Available quantities from projective measurements on a quantum state are 
 $\mathbf{bin}(\mu)$, the binary representation of the determinant $\ket{\mu}$ to which the state collapes after measuring $\ket{k}$ in the computational basis, 
 and $|C_{k \mu}|^2$, the probability of getting $\ket{\mu}$.\cite{rieffel2011quantum}
@@ -241,18 +236,21 @@ H_{I(s+1)+\alpha,\; J(s+1)+\beta} &= \bra{\Phi_I} e^{i \alpha \Delta t \hat{H}} 
 \end{align}
 where $\alpha, \beta \in [0,1,...,s]$, $I, J \in [0,1,...,d-1]$, indices are consistent with the basis ordering in Eq. \ref{krylov}. 
 
-\subsection{State Preparation} Given a qubit Hamiltonian after the Jordan-Wigner\cite{jordan1993paulische} or the Bravyi-Kitaev encoding,\cite{Seeley:2012em}  
+%%%%%%%%%%%%%%%%
+\subsection{State Preparation} 
+
+Given a qubit Hamiltonian after the Jordan-Wigner\cite{jordan1993paulische} or the Bravyi-Kitaev encoding,\cite{Seeley:2012em} in general, not all terms (tensor products of Pauli operators) in the Hamiltonian commute.
 \begin{equation}
-\hat{H}=E_{0}+\sum_{l} h_{l} \bigotimes_{k=1}^{n} \sigma_{k}^{\{I, X, Y, Z\}}
+\hat{H}=E_{0}+\sum_{l}^{N} h_{l} \bigotimes_{k=1}^{n} \sigma_{k}^{\{I, X, Y, Z\}}
 \end{equation}
-one may realize the time evolution operator $e^{-i t \hat{H}}$ on a quantum computer following the widely-used first order Lie-Trotter-Suzuki product approximation\cite{Trotter:1959wh, Suzuki:1991fz, hatano2005finding} or higher-order product formulae\cite{Suzuki:1976cf, Berry:2007iw}. 
+One may realize the time evolution operator $e^{-i t \hat{H}}$ on a quantum computer following the widely-used first order Lie-Trotter-Suzuki product approximation\cite{Trotter:1959wh, Suzuki:1991fz, hatano2005finding} or higher-order product formulae\cite{Suzuki:1976cf, Berry:2007iw}. 
 Other more sophisticated methods include truncated Taylor series expansions,\cite{Berry:2015ir, Babbush:2016bx}
 linear combinations of unitaries (LCU),\cite{Childs:2012cg}
 Chebyshev polynomial approximations,\cite{Subramanian:2019ex} 
 or the recently proposed qubitization\cite{Low:2019kr, Berry:2019bb} in conjunction with quantum signal processing\cite{Low:2017kn} methods.
 In our case, the first-order Lie-Trotter-Suzuki product with $m$ Trotter steps (numbers) is employed
 \begin{equation}
-e^{-i t \hat{H}}=\left(\prod_{l} e^{-i \frac{t h_{l}}{m} \bigotimes_{k} \sigma_{k}}\right)^{m} 
+e^{-i t \hat{H}}=\left(\prod_{l}^N e^{-i \frac{t h_{l}}{m} \bigotimes_{k} \sigma_{k}}\right)^{m} 
 + O\left(\frac{(t h_{l})^{2}} {m}\right)
 \end{equation}
 The error in approximating $e^{-i t \hat{H}}$ using product formula is determined by both the number of Trotter steps and the Trotter order. 
@@ -260,23 +258,55 @@ In the first-order Trotter-Suzuki formula, the number of Trotter steps required 
 
 It has been observed that in practice, the first order Trotter-Suzuki product gives errors in the ground state energy scaling as $1/m^2$,\cite{Hastings:2015uj} same as that of second-order Trotter-Suzuki approximation. Therefore, considering both the error scaling and the state preparation cost, the first-order formula that has much shorter circuits is favorable.
 
-We argue that the \methodabbr method is likely to achieve better error scaling than the Trotter error, because it has the variational optimization of the state when solving the generalized eigenvalue problem in a subspace, while variational methods appear to have error resilience to some extent.\cite{McClean:2015bs, OMalley:2016dc}
+We argue that the \methodabbr method is likely to achieve better error scaling than the Trotter error, because it has the variational optimization of the state when solving the generalized eigenvalue problem in a subspace, while variational methods are shown to be resilient to errors to some extent.\cite{McClean:2015bs, OMalley:2016dc}
 
-\subsection{Quantum circuits for measuring matrix elements} 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Quantum Circuits for Measuring Matrix Elements} 
+
+ In order to compute matrix elements on quantum devices, we use a modified Hadamard test\cite{Somma:2003jz} (shown in Fig.~\ref{circ_hadamard}) to measure observables indirectly with the help of one ancilla qubit. To explain it more detailedly, we reformulate Eq. \ref{overlap_eq} and Eq. \ref{hamiltonian_eq}, denoting collective indices $\gamma = (I, \alpha)$, $\chi = (J, \beta)$, and the $l$-th tensor product in the qubit Hamiltonian $\hat{P}_l =  \bigotimes_{k=1}^n \sigma_{k}^{\{I,X,Y,Z\}}$
+\begin{align}
+\label{s_reform}
+S_{\gamma \chi} 
+& = \braket{\bar{0} | \hat{U}_I^\dagger \; (\prod_{l} e^{i \frac{\alpha \Delta t h_{l}}{m} \hat{P}_l  } )^{m}  \vdots    
+( \prod_{l} e^{- i \frac{\beta \Delta t h_{l}}{m}  \hat{P}_l  } )^{m}   \;    \hat{U}_J  |  \bar{0}  }  
+= \braket{\bar{0} | \hat{U}_I^{\dagger}   \hat{U}_\alpha^{\dagger}   \hat{U}_\beta    \hat{U}_J  |  \bar{0}  }
+= \braket{\bar{0} | \hat{U}_\gamma^{\dagger}  \hat{U}_\chi  |  \bar{0}  }  \\
+\label{h_reform}
+H_{\gamma \chi} 
+& = \braket{\bar{0} | \hat{U}_I^\dagger \; (\prod_{l} e^{i \frac{\alpha \Delta t h_{l}}{m} \hat{P}_l  } )^{m}  \hat{H}
+( \prod_{l} e^{- i \frac{\beta \Delta t h_{l}}{m}  \hat{P}_l  } )^{m}   \;    \hat{U}_J  |  \bar{0}  } 
+= E_0 \braket{\bar{0} | \hat{U}_\gamma^{\dagger}  \hat{U}_\chi  |  \bar{0}  }  +\sum_l^N   h_l  \braket{\bar{0} | \hat{U}_\gamma^{\dagger} \,  \hat{P}_l   \,  \hat{U}_\chi  |  \bar{0}  }
+\end{align}
+$\hat{U}_I$, $\hat{U}_J$ are unitary oracles for preparing reference states. For a single determinant (one computational basis state), $\hat{U}_{\{I,J\}}$ comprises one layer of X gates. Protocols for constructing multi-determinant states are proposed\cite{Sugisaki:2016kx, Tubman:2018wz} with linear scaling in the number of qubits. 
+In the most general case when matrix elements are between basis states that evolve from different references $\ket{\Phi_I}$, $\ket{\Phi_J}$, we need to implement the controlled reference oracles $\controlop{\hat{U}_{\{I,J\}}}$, which have two-qubit gates at the same scaling as single-qubit gates in $\hat{U}_{\{I,J\}}$.
+While for matrix elements between states from the same reference $\ket{\Phi_I}$, we simplify Eq. \ref{s_reform}, \ref{h_reform} as $S_{\gamma \chi}=\braket{\Phi_I |  \hat{U}_\alpha^{\dagger}  \hat{U}_\beta  |  \Phi_I  }$,
+$H_{\gamma \chi}=E_0 \braket{\Phi_I |  \hat{U}_\alpha^{\dagger}  \hat{U}_\beta  |  \Phi_I  }  + \sum_l h_l \braket{\Phi_I |  \hat{U}_\alpha^{\dagger}  \hat{U}_\beta  |  \Phi_I  }$,
+where only the series of exponentials of $\hat{P}_I$ are included in the controlled unitaries.
+
+
+\begin{figure}[bh!]
+\[ \Qcircuit @C=1em @R=.7em {
+& \lstick{\ket{\bar{0}}}        &\qw          & \qw          & \gate{\hat{U}_\gamma}  &   \qw          & \gate{\hat{U}_\chi}      & \qw     \\
+& \lstick{\ket{0} }      &\gate{H}   & \gate{X}             & \ctrl{-1}  \qwx                   & \gate{X}        & \ctrl{-1}  \qwx           &   \rstick{\braket{X+iY}}   \qw  \\  
+% \measure{\mbox{$2\sigma_{+}$}} 
+} \]
+\caption{Hadamard test circuit to estimate expectation values of unitary operators with a general form of $\braket{\bar{0} | \hat{U}_\gamma^\dagger  \hat{U}_\chi | \bar{0}} $. Measuring the $X$, $Y$ operators on the ancillary qubit $\ket{0}$, one can obtain the mean value of $X+iY = 2 \ket{0}\bra{1}$, which equals to $\braket{X+iY} = \braket{\bar{0} | \hat{U}_\gamma^\dagger  \hat{U}_\chi  | \bar{0}} $ }
+\label{circ_hadamard}
+\end{figure}
+
+
+%%%%%%%%%%%%%%%%
+\subsection{Cost Estimation}
 
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Results and Discussion}
-
-\subsection{Ordering of Pauli terms after Trotterization}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Ordering of Pauli terms in Trotterization}
 
 Different ordering of Pauli terms are tested.
 Chemical accuracy can be achieved using a Trotter number of 4 and 20 Krylov basis states.
@@ -361,7 +391,7 @@ FCI       &  $-$2.889922    &       \\
 
 \newpage
 \bibliographystyle{achemso}
-\bibliography{bibs/jan26export.bib,bibs/extra.bib,bibs/qkdrefs.bib}{}
+\bibliography{bibs/jan27export.bib,bibs/extra.bib,bibs/qkdrefs.bib}{}
 
 \end{document}
 
