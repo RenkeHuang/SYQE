@@ -241,8 +241,28 @@ H_{I(s+1)+\alpha,\; J(s+1)+\beta} &= \bra{\Phi_I} e^{i \alpha \Delta t \hat{H}} 
 \end{align}
 where $\alpha, \beta \in [0,1,...,s]$, $I, J \in [0,1,...,d-1]$, indices are consistent with the basis ordering in Eq. \ref{krylov}. 
 
+\subsection{State Preparation} Given a qubit Hamiltonian after the Jordan-Wigner\cite{jordan1993paulische} or the Bravyi-Kitaev encoding,\cite{Seeley:2012em}  
+\begin{equation}
+\hat{H}=E_{0}+\sum_{l} h_{l} \bigotimes_{k=1}^{n} \sigma_{k}^{\{I, X, Y, Z\}}
+\end{equation}
+one may realize the time evolution operator $e^{-i t \hat{H}}$ on a quantum computer following the widely-used first order Lie-Trotter-Suzuki product approximation\cite{Trotter:1959wh, Suzuki:1991fz, hatano2005finding} or higher-order product formulae\cite{Suzuki:1976cf, Berry:2007iw}. 
+Other more sophisticated methods include truncated Taylor series expansions,\cite{Berry:2015ir, Babbush:2016bx}
+linear combinations of unitaries (LCU),\cite{Childs:2012cg}
+Chebyshev polynomial approximations,\cite{Subramanian:2019ex} 
+or the recently proposed qubitization\cite{Low:2019kr, Berry:2019bb} in conjunction with quantum signal processing\cite{Low:2017kn} methods.
+In our case, the first-order Lie-Trotter-Suzuki product with $m$ Trotter steps (numbers) is employed
+\begin{equation}
+e^{-i t \hat{H}}=\left(\prod_{l} e^{-i \frac{t h_{l}}{m} \bigotimes_{k} \sigma_{k}}\right)^{m} 
++ O\left(\frac{(t h_{l})^{2}} {m}\right)
+\end{equation}
+The error in approximating $e^{-i t \hat{H}}$ using product formula is determined by both the number of Trotter steps and the Trotter order. 
+In the first-order Trotter-Suzuki formula, the number of Trotter steps required for a simulation error of $\epsilon$ scales as $m = O((t h_{l})^{2} / \epsilon)$, so $m$ should be large to suppress approximation errors. 
 
-\subsection{Quantum circuits for measuring matrix elements} Given a qubit Hamiltonian after Jordan-Wigner\cite{jordan1993paulische} or Bravyi-Kitaev encoding\cite{Seeley:2012em}  $\hat{H}=E_{0}+\sum_{l} h_{l} \bigotimes_{k=1}^{n} \sigma_{k}^{\{I, X, Y, Z\}}$, the 
+It has been observed that in practice, the first order Trotter-Suzuki product gives errors in the ground state energy scaling as $1/m^2$,\cite{Hastings:2015uj} same as that of second-order Trotter-Suzuki approximation. Therefore, considering both the error scaling and the state preparation cost, the first-order formula that has much shorter circuits is favorable.
+
+We argue that the \methodabbr method is likely to achieve better error scaling than the Trotter error, because it has the variational optimization of the state when solving the generalized eigenvalue problem in a subspace, while variational methods appear to have error resilience to some extent.\cite{McClean:2015bs, OMalley:2016dc}
+
+\subsection{Quantum circuits for measuring matrix elements} 
 
 
 
@@ -341,7 +361,7 @@ FCI       &  $-$2.889922    &       \\
 
 \newpage
 \bibliographystyle{achemso}
-\bibliography{bibs/jan25export.bib,bibs/extra.bib,bibs/qkdrefs.bib}{}
+\bibliography{bibs/jan26export.bib,bibs/extra.bib,bibs/qkdrefs.bib}{}
 
 \end{document}
 
