@@ -37,8 +37,8 @@
 
 \newcommand*{\Eh}{$E_{\rm h}$\xspace}
 \newcommand*{\Ecorr}{$E_{\rm{corr}}$\xspace}
-\newcommand*{\RCMnorm}{$\norm{\pmb{\lambda}_{2}}^{2}_{F}$\xspace}
-\newcommand*{\dRCMnorm}{$\norm{\pmb{\delta\lambda}_{2}}^{2}_{F}$\xspace}
+%\newcommand*{\RCMnorm}{$\norm{\pmb{\lambda}_{2}}^{2}_{F}$\xspace}
+%\newcommand*{\dRCMnorm}{$\norm{\pmb{\delta\lambda}_{2}}^{2}_{F}$\xspace}
 \newcommand{\basis}[2]{\psi_{#1}^{({#2})}\xspace}
 \newcommand{\familyabbr}[0]{QSD\xspace}
 \newcommand{\familyname}[0]{Quantum Subspace Diagonalization\xspace}
@@ -46,6 +46,7 @@
 \newcommand{\methodabbr}[0]{MRSQK\xspace}
 % the next two go together
 \newcommand{\controlop}[1]{\mathrm{c}\mhyphen{#1}}
+
 \mathchardef\mhyphen="2D
 
 \providecommand{\norm}[1]{\lVert#1\rVert}
@@ -146,30 +147,120 @@ While VQE experiments have been realized on most existing hardware architectures
 
 The idea of representing the Hamiltonian in a non-orthogonal subspace,\cite{ostlund1982modern} which has various practices in classical computational chemistry,\cite{Lowdin:1950tq,King:1967ev,Noodleman:1981iz,Voter:1981eu,Malmqvist:1986jh,Koch:1993tf,thom2009hartree,sundstrom2014non} has also been adopted in a class of quantum-classical algorithms referred to as \familyname (QSD).\cite{McClean:2017ct,Colless:2018hp,Motta:2019bu, Parrish:2019tc,Huggins:2019vv,Ollitrault:2019tn,Takeshita:2020dh}
 The initial proposal of QSD, named quantum subspace expansion (QSE), aimed at extending the VQE scheme to compute excited states and mitigate errors.\cite{McClean:2017ct} 
-In this work, the Hamiltonian is expanded in the configuration interactions singles (CIS) subspace $\hat{a}_{i}^{\dagger} \hat{a}_{j}|\Psi\rangle$, and overlap matrix elements are three- and four-electron reduced density matrices measured in VQE experiments by operator averaging.\cite{Takeshita:2020dh} Then solving the generalized eigenvalue problem yields both the ground and excited states. Nevertheless, the CIS basis only expands a relatively small, restricted Hilbert space. Diagonalization of the possible noisy Hamiltonian matrices in this space might lead to systematic biases.\cite{Blunt:2018ee}
+In this work, the Hamiltonian is expanded in the configuration interactions singles (CIS) subspace $\hat{a}_{i}^{\dagger} \hat{a}_{j}\ket{|\Psi}$, and overlap matrix elements are three- and four-electron reduced density matrices measured in VQE experiments by operator averaging.\cite{Takeshita:2020dh} Then solving the generalized eigenvalue problem yields both the ground and excited states. Nevertheless, the CIS basis only expands a relatively small, restricted Hilbert space. Diagonalization of the possible noisy Hamiltonian matrices in this space might lead to systematic biases.\cite{Blunt:2018ee}
 Huggins \textit{et al.} developed another VQE-based QSD method, termed the non-orthogonal VQE (NOVQE) approach,\cite{Huggins:2019vv} which uses separate VQE experiments to generate and optimize a set of non-orthogonal $k$-UpCCGSD type states\cite{Lee:2018cy} and diagonalizes the Hamiltonian in this basis. One motivation of this work is to mitigate the difficulty of optimization in the context of VQE.
 
 While many efforts in the QSD is to extend or augment the VQE scheme, the general QSD framework is likely to go beyond, specifically in terms of the great flexibility in the way to form the subspace. 
-Motta \textit{et al.} proposed the Quantum Lanczos (QLanczos) algorithm\cite{Motta:2019bu} which fills a Krylov subspace with basis vectors in powers of $e^{-2\Delta \tau H}$ such that $\mathcal{K}: \{|\Phi \rangle, e^{-2 \Delta \tau H}, e^{-4  \Delta \tau H},…  \}$. These basis vectors are obtained using the QITE algorithm,\cite{Motta:2019bu} which maps the Trotterized imaginary-time propagator to a unitary operator scaled by the norm of the evolved state vector after a single Trotter time step. The matrix elements in the QLanczos are computed based on the expectations values of those mapped unitaries, which are available after direct measurements. Note that the QLanczos algorithm requires no classical optimization, and its convergence is guaranteed by properties of the imaginary-time evolution, free of fixed ansatz errors in its variational variant.\cite{McArdle:2019ek} These advantages show that the QSD scheme provides viable solutions to circumvent problems that hinder the VQE methods. 
+Motta \textit{et al.} proposed the Quantum Lanczos (QLanczos) algorithm\cite{Motta:2019bu} which fills a Krylov subspace with basis vectors in powers of $e^{-2\Delta \tau H}$ such that $\mathcal{K}: \{\ket{\Phi}, e^{-2 \Delta \tau H}\ket{\Phi}, e^{-4  \Delta \tau H}\ket{\Phi},…  \}$. These basis vectors are obtained using the QITE algorithm,\cite{Motta:2019bu} which maps the Trotterized\cite{Trotter:1959wh} imaginary-time propagator to a unitary operator scaled by the norm of the evolved state vector after a single Trotter time step. The matrix elements in the QLanczos are computed based on the expectations values of those mapped unitaries, which are available after direct measurements. Note that the QLanczos algorithm requires no classical optimization, and its convergence is guaranteed by properties of the imaginary-time evolution, free of fixed ansatz errors in its variational variant.\cite{McArdle:2019ek} These advantages show that the QSD scheme provides viable solutions to circumvent problems that hinder the VQE methods. 
 
-Inspired by the QLanczos algorithm, we proposed a multireference QSD method based on real-time dynamics, and also provided the circuit to evaluate matrix elements efficiently by indirect measurements (the Hadamard test),\cite{aharonov2009polynomial} which is distinct from the expectation value measuring in the situation of both the QSE\cite{McClean:2017ct} and the Qlanczos.\cite{Motta:2019bu}
+Inspired by the QLanczos algorithm, we proposed a multireference selected quantum Krylov (MRSQK) method\cite{stair2019multireference} based on real-time dynamics, and also provided the circuit to evaluate matrix elements efficiently by indirect measurements (the Hadamard test),\cite{aharonov2009polynomial} which is distinct from the expectation value measuring in the situation of both the QSE\cite{McClean:2017ct} and the Qlanczos.\cite{Motta:2019bu}
 QSD methods that generate the non-orthogonal basis from a single state are likely to suffer from numerical instabilities due to the linear dependency of basis states.\cite{Motta:2019bu,Huggins:2019vv} Thus, we initialized the QSD procedure with a set of orthogonal references.
 When completing this work, we noticed a recent preprint paper by Parrish and McMahon\cite{Parrish:2019tc} which shares part of the ideas employed in our work. 
 They theorized a quantum filter diagonalization approach (QFD) in which the variational basis is generated by propagating several reference states approximately in real-time, which is motivated by classical filter diagonalization\cite{Neuhauser:1994jp,Neuhauser:1990dp,wall1995extraction, mandelshtam1997low} and time-grid-propagation based quantum algorithms.\cite{Somma:2002jo,Somma:2019th,OBrien:2019cw,Kyriienko:2020gg} 
-The QFD method is applied to simulate the spectrum of an 8-qubit \textit{ab initio} exciton Hamiltonian, where they started with the zero configuration $|00...\rangle$ and all singly-excited configurations \{$|10...\rangle$, $|010...\rangle$,...\}, and propagated these references to form a time-grid subspace.\cite{Parrish:2019tc}.
+The QFD method is applied to simulate the spectrum of an 8-qubit \textit{ab initio} exciton Hamiltonian, where they started with the zero configuration $\ket{00...}$ and all singly-excited configurations \{$\ket{10...}$, $\ket{010...}$,...\}, and propagated these references to form a time-grid subspace.\cite{Parrish:2019tc}.
 While we utilized the same strategy to produce basis states from a single reference, our method has the novelty that real-time dynamics on the mean-field reference and measurements are also used to automatically select important configurations with large amplitudes out and add them to the set of references. The selection procedure preserves symmetries, such as the particle number, the total spin, the spatial symmetry, making it fit for the fermionic Hamiltonian, which is generally more complicated than the exciton model.
 
 
-\section{Results and Discussion}
+%%%%%%%%%%%%%%%%%
+\section{Theory}
 
+
+\subsection{Basis in \methodabbr}
+
+The \methodname method combined with real-time dynamics generates a $d(s+1)$-dimensional non-orthogonal Krylov space $\mathcal{K}$ in the form 
+\begin{equation}
+\begin{split}
+\label{krylov}
+\mathcal{K} : \{ & \ket{\Phi_{0}}, e^{-i \Delta t \hat{H}} \ket{\Phi_{0}}, e^{-i 2 \Delta t \hat{H}} \ket{\Phi_{0}}, ... , e^{-i s\Delta t \hat{H}} \ket{\Phi_{0}}, \\
+& \ket{\Phi_{1}}, e^{-i \Delta t \hat{H}} \ket{\Phi_{1}}, e^{-i 2 \Delta t \hat{H}} \ket{\Phi_{1}}, ... ,e^{-i s\Delta t \hat{H}} \ket{\Phi_{1}}, \\
+& ... \\
+& \ket{\Phi_{d-1}}, e^{-i \Delta t \hat{H}} \ket{\Phi_{d-1}}, e^{-i 2 \Delta t \hat{H}} \ket{\Phi_{d-1}}, ... ,e^{-i s\Delta t \hat{H}} \ket{\Phi_{d-1}}  \}  
+\end{split}
+\end{equation}
+This is done in two successive procedures, including the \textit{reference selection} and the \textit{reference propagation}.
+
+The \textit{reference selection} utilizes the real-time evolution of a single Slater determinant $\ket{\Phi_0}$ (usually the Hartree-Fock reference) to determine other $(d-1)$ references.
+It starts with propagating $\ket{\Phi_0}$ at fixed intervals in real-time, which forms a trial time-grid basis $\{\ket{\Phi_0}, e^{-i\Delta t \hat{H}} \ket{\Phi_0}, e^{-i2\Delta t \hat{H}} \ket{\Phi_0}...\}$ with $(s^{\prime}+1)$ dimension.
+The ground state of the Hamiltonian in this trial basis is written as
+\begin{equation}
+\ket{\widetilde{\Psi}_{0}} = \sum_{k=0}^{s^{\prime}} C_{0 k} \, e^{-i k \Delta t \hat{H}} \ket{\Phi_{0}}
+= \sum_{k=0}^{s^{\prime}} C_{0 k}  \ket{k}
+\end{equation}
+We use Jordan-Wigner transform\cite{jordan1993paulische} to map the fermionic Fock space to the Hilbert space of qubits.\cite{whitfield2011simulation} In this mapping, a Slater determinant in the Fock space is represented by a qubit computational basis state that has the same binary representation. Thus, we can consider these two bases equivalently in the following explanation. 
+Each time-grid basis vector $\ket{k}$ can be written as a linear combination of $n$-qubit computational basis states (Slater determinants) $\ket{k} = \sum_{\mu} C_{k \mu} \ket{\mu}$. Then, the trial ground state vector can be decomposed in the computational basis
+\begin{equation}
+\label{trial_gs}
+\ket{\widetilde{\Psi}_{0}} = \sum_{k=0}^{s^{\prime}} \sum_{\mu=0}^{2^{n}-1}  C_{0 k} \, C_{k \mu} \ket{\mu} 
+\end{equation}
+Based on Eq. \ref{trial_gs}, the probability of measuring the determinant $\ket{\mu}$ in the trial ground state $\ket{\widetilde{\Psi}_{0}}$ is given by $P_{\mu}=|\sum_{k=0}^{s^{\prime}} C_{0 k} C_{k \mu}|^{2}$.
+$\ket{\widetilde{\Psi}_{0}}$ can also be written in a compact way as the Hadamard product\cite{horn2012matrix} (element-wise multiplication) of three vectors $\ket{\widetilde{\Psi}_{0}} = \sum_{k} \mathbf{C_{0}}  \circ  \mathbf{C_{k }}   \circ \,  \vec{\mu}$,
+where $\vec{\mu}$ comprises all the n-qubit computational basis states $\vec{\mu} = (\ket{0}, \ket{1}, ... ,\ket{2^{n}-1})$.
+
+
+The coefficient vector $\mathbf{C_{0}} = (C_{00}, C_{01}, ... , C_{0s^{\prime}} )$ is obtained by solving the generalized eigenvalue problem,
+\begin{equation}
+\label{ge}
+\mathbf{HC} = \mathbf{SCE}
+\end{equation}
+with matrix elements given by 
+$S_{\alpha \beta} = \bra{\Phi_0} e^{i \alpha \Delta t \hat{H}} e^{-i \beta \Delta t \hat{H}} \ket{\Phi_0} $,
+$\ H_{\alpha \beta} = \bra{\Phi_0} e^{i \alpha \Delta t \hat{H}}  \hat{H}   e^{-i \beta \Delta t \hat{H}}  \ket{\Phi_0}$,
+%\begin{align}
+%S_{\alpha \beta} &= \bra{\Phi_0} e^{i \alpha \Delta t H} e^{-i \beta \Delta t H} \ket{\Phi_0}, \\
+%H_{\alpha \beta} &= \bra{\Phi_0} e^{i \alpha \Delta t H} \hat{H} e^{-i \beta \Delta t H} \ket{\Phi_0}
+%\end{align}
+where $\alpha, \beta \in [0,1,...,s^{\prime}]$. $\mathbf{C_{0}}$ is the eigenvector corresponding to the lowest eigenvalue.
+
+$\mathbf{C_{k }}$ is the state vector of the quantum state $\ket{k} = e^{-i k \Delta t \hat{H}} \ket{\Phi_0} = \sum_{\mu} C_{k \mu} \ket{\mu}$, which can be simulated classically (e.g. statevector simulator in the \textsc{Qiskit-Aer}\cite{Qiskit} package). However, in real experiments, the state vector cannot be directly read out from the quantum computer. 
+Available quantities from projective measurements on a quantum state are 
+$\mathbf{bin}(\mu)$, the binary representation of the determinant $\ket{\mu}$ to which the state collapes after measuring $\ket{k}$ in the computational basis, 
+and $|C_{k \mu}|^2$, the probability of getting $\ket{\mu}$.\cite{rieffel2011quantum}
+While the exact value of any $C_{k \mu}$, which is complex in general, can not be determined, we can nonetheless use $|C_{k \mu}|^2$ to upper bound the probability of sampling the determinant $\ket{\mu}$ in the trial ground state $\ket{\widetilde{\Psi}_{0}}$:
+\begin{equation}
+P_{\mu} =  | \sum_{k=0}^{s^{\prime}}  C_{0 k} C_{k \mu}  |^2   
+\leqslant  \sum_{k} |C_{0 k} |^{2}  |C_{k \mu}|^{2} 
+\end{equation}
+which follows from the Cauchy-Schwarz inequality.
+The upper bound expression is adopted in practice for the probability estimation.
+To make it more explicitly, we prepare time-grid basis states $\{\ket{k}\}$ separately on multiple quantum computers. Each quantum computer outputs a probability distribution $\{|C_{\mu} |^{2}\}_{\mu}$ of determinants. 
+The overall probability of a single $\ket{\mu}$ is computed as the weighted sum over the probability of $\ket{\mu}$ in each time-grid basis state. 
+Note that we only use the value of $P_{\mu}$ to select important states, so a qualitatively correct measurement statistics of the time-evolved state is sufficient for our need, which means not many measurement repetitions are required. 
+
+Through finite measurements, we form a coarse aggregate of important determinants and sort them in descending order according to the overall probability. 
+Next, the set is refined, such that only determinants with the same particle number as $\ket{\Phi_0}$ are kept. 
+Then, we enforce the total spin symmetry by leaving the closed-shell configurations alone as one state, grouping open-shell configurations with the same spin occupation pattern to zero out the total spin, summing their weights, and normalizing the obtained multi-configurational states.
+Lastly, we select $d-1$ largest-weighted states, together with $\ket{\Phi_0}$, to form our reference set $\{ \ket{\Phi_{I}} \}_{I=0}^{d-1}$.
+The \textit{reference propagation} then fills the Krylov space with states sampled at fixed intervals when evolving each reference.
+
+Diagonalizing the Hamiltonian in the entire $d(s+1)$-dimensional space $\mathcal{K}$ requires solving Eq. \ref{ge} again, with more general matrix representations of the overlap $\mathbf{S}$ and the Hamiltonian $\mathbf{H}$ given by
+\begin{align}
+\label{overlap_eq}
+S_{I(s+1)+\alpha,\; J(s+1)+\beta} &= \bra{\Phi_I} e^{i \alpha \Delta t \hat{H}} e^{-i \beta \Delta t \hat{H}} \ket{\Phi_J}, \\
+\label{hamiltonian_eq}
+H_{I(s+1)+\alpha,\; J(s+1)+\beta} &= \bra{\Phi_I} e^{i \alpha \Delta t \hat{H}} \hat{H} e^{-i \beta \Delta t \hat{H}} \ket{\Phi_J}
+\end{align}
+where $\alpha, \beta \in [0,1,...,s]$, $I, J \in [0,1,...,d-1]$, indices are consistent with the basis ordering in Eq. \ref{krylov}. 
+
+
+\subsection{Quantum circuits for measuring matrix elements} Given a qubit Hamiltonian after Jordan-Wigner\cite{jordan1993paulische} or Bravyi-Kitaev encoding\cite{Seeley:2012em}  $\hat{H}=E_{0}+\sum_{l} h_{l} \bigotimes_{k=1}^{n} \sigma_{k}^{\{I, X, Y, Z\}}$, the 
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Results and Discussion}
 
 \subsection{Ordering of Pauli terms after Trotterization}
 
 Different ordering of Pauli terms are tested.
 Chemical accuracy can be achieved using a Trotter number of 4 and 20 Krylov basis states.
 
-
-%%%%% Table for showing good performance even with Trotter approximation %%%%%
 \begin{table*}[!ht]
 \centering
 \renewcommand{\arraystretch}{1.1}
@@ -250,7 +341,7 @@ FCI       &  $-$2.889922    &       \\
 
 \newpage
 \bibliographystyle{achemso}
-\bibliography{bibs/jan23export.bib,bibs/extra.bib,bibs/qkdrefs.bib}{}
+\bibliography{bibs/jan25export.bib,bibs/extra.bib,bibs/qkdrefs.bib}{}
 
 \end{document}
 
