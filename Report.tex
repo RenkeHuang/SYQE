@@ -186,7 +186,7 @@ The ground state of the Hamiltonian in this trial basis is written as
 \ket{\widetilde{\Psi}_{0}} = \sum_{k=0}^{s^{\prime}} C_{0 k} \, e^{-i k \Delta t \hat{H}} \ket{\Phi_{0}}
 = \sum_{k=0}^{s^{\prime}} C_{0 k}  \ket{k}
 \end{equation}
-We use Jordan-Wigner transform\cite{jordan1993paulische} to map the fermionic Fock space to the Hilbert space of qubits.\cite{whitfield2011simulation} In this mapping, a Slater determinant in the Fock space is represented by a qubit computational basis state that has the same binary representation. Thus, we can consider these two bases equivalently in the following explanation. 
+We use Jordan-Wigner transform\cite{jordan1993paulische} to map the fermionic Fock space to the Hilbert space of qubits.\cite{whitfield2011simulation} In this mapping, a Slater determinant in the Fock space is represented by a qubit computational basis state that has the same binary representation. Note that the algorithm is agnostic to the encoding method, but in order to give a chemically-intuitive picture, that determinants (fermionic basis states) and computational basis states are the same in the Jordan-Wigner encoding, we can conveniently view these two bases equivalently in the following explanation.
 Each time-grid basis vector $\ket{k}$ can be written as a linear combination of $n$-qubit computational basis states (Slater determinants) $\ket{k} = \sum_{\mu} C_{k \mu} \ket{\mu}$. Then, the trial ground state vector can be decomposed in the computational basis
 \begin{equation}
 \label{trial_gs}
@@ -277,12 +277,11 @@ H_{\gamma \chi}
 ( \prod_{l} e^{- i \frac{\beta \Delta t h_{l}}{m}  \hat{P}_l  } )^{m}   \;    \hat{U}_J  |  \bar{0}  } 
 = E_0 \braket{\bar{0} | \hat{U}_\gamma^{\dagger}  \hat{U}_\chi  |  \bar{0}  }  +\sum_l^N   h_l  \braket{\bar{0} | \hat{U}_\gamma^{\dagger} \,  \hat{P}_l   \,  \hat{U}_\chi  |  \bar{0}  }
 \end{align}
-$\hat{U}_I$, $\hat{U}_J$ are unitary oracles for preparing reference states. For a single determinant (one computational basis state), $\hat{U}_{\{I,J\}}$ comprises one layer of X gates. Protocols for constructing multi-determinant states are proposed\cite{Sugisaki:2016kx, Tubman:2018wz} with linear scaling in the number of qubits. 
+$\hat{U}_I$, $\hat{U}_J$ are unitary oracles that output reference states. For a single determinant (one computational basis state), $\hat{U}_{\{I,J\}}$ comprises one layer of X gates. Protocols for constructing multi-determinant states are proposed\cite{Sugisaki:2016kx, Tubman:2018wz} with linear scaling in the number of qubits. 
 In the most general case when matrix elements are between basis states that evolve from different references $\ket{\Phi_I}$, $\ket{\Phi_J}$, we need to implement the controlled reference oracles $\controlop{\hat{U}_{\{I,J\}}}$, which have two-qubit gates at the same scaling as single-qubit gates in $\hat{U}_{\{I,J\}}$.
 While for matrix elements between states from the same reference $\ket{\Phi_I}$, we simplify Eq. \ref{s_reform}, \ref{h_reform} as $S_{\gamma \chi}=\braket{\Phi_I |  \hat{U}_\alpha^{\dagger}  \hat{U}_\beta  |  \Phi_I  }$,
 $H_{\gamma \chi}=E_0 \braket{\Phi_I |  \hat{U}_\alpha^{\dagger}  \hat{U}_\beta  |  \Phi_I  }  + \sum_l h_l \braket{\Phi_I |  \hat{U}_\alpha^{\dagger}  \hat{U}_\beta  |  \Phi_I  }$,
-where only the series of exponentials of $\hat{P}_I$ are included in the controlled unitaries.
-
+where only the series of exponentials of $\hat{P}_I$ are included in the controlled unitaries, with $\hat{U}_{\{I=J\}}$ gulped in the main register state preparation.
 
 \begin{figure}[bh!]
 \[ \Qcircuit @C=1em @R=.7em {
@@ -292,6 +291,38 @@ where only the series of exponentials of $\hat{P}_I$ are included in the control
 } \]
 \caption{Hadamard test circuit to estimate expectation values of unitary operators with a general form of $\braket{\bar{0} | \hat{U}_\gamma^\dagger  \hat{U}_\chi | \bar{0}} $. Measuring the $X$, $Y$ operators on the ancillary qubit $\ket{0}$, one can obtain the mean value of $X+iY = 2 \ket{0}\bra{1}$, which equals to $\braket{X+iY} = \braket{\bar{0} | \hat{U}_\gamma^\dagger  \hat{U}_\chi  | \bar{0}} $ }
 \label{circ_hadamard}
+\end{figure}
+
+The method to exponentiate tensor products of Pauli gates is described in Ref.~\citenum{Seeley:2012em, Hastings:2015uj}. The exponential of one $\hat{P}_l=\bigotimes_{k} \sigma_{k}$ is given by
+\begin{equation}
+e^{-i t_{l} \otimes_{k} \sigma_{k}} = \left(    \bigotimes_{k=1}^n H_k^\dagger  \right) 
+\left( \prod_{i=1}^{n-1}  \mathrm{CNOT}_{i,i+1}  \right)
+e^{-i t_{l}  \sigma_{n}^Z} 
+\left( \prod_{i=n-1}^{1}  \mathrm{CNOT}_{i,i+1}  \right)
+\left(    \bigotimes_{k=1}^n H_k  \right) 
+\end{equation}
+where $H_k$ gates perform transformations between the eigenbasis of $\sigma^X$ or $\sigma^Y$ and $\sigma^Z$, i.e. $H_k^\dagger  \sigma^{\{X, Y\}}  H_k = \sigma^Z$, $t_l = \alpha \Delta  t  h_l / m$
+and $e^{-i t_{l}  \sigma_{n}^Z}  = R_z(2t_l)$ represents the $Z$ rotation gate on the qubit with the largest index.
+
+For applying $e^{-i t_{l} \otimes_{k} \sigma_{k}}$ on the main register controlled by the ancillary qubit, we only need to replace the $R_z(2t_l)$ with a controlled $R_z(2t_l)$ on the last qubit. In this way, $l$ terms in a single Trotter step are executed sequentially. For larger Trotter number $m$, we just run $m$ replicas of $l$-terms in series.
+
+To give readers an idea of how to construct such circuits in practice, we demonstrate an example circuit to compute one matrix element for a two-qubit molecular \ce{H2} Hamiltonian\cite{OMalley:2016dc} using the spin-preserved Bravyi-Kitaev transformation,\cite{Seeley:2012em, Bravyi:2017wb} at the bond length of 0.75 \AA. Coefficients $h_l$ are computed in STO-3G basis given in Table I of the supplementary information of Ref.~\citenum{Colless:2018hp}. 
+\begin{equation}
+\hat{H}_q = -0.349833 - 0.388748\sigma_0^Z  + 0.181771\sigma_0^X \sigma_1^X - 0.388748 \sigma_1^Z + 0.011177\sigma_0^Z \sigma_1^Z
+\end{equation}
+Four determinants are mapped to computational basis states explicitly as 
+$\ket{00} = a_{0 \alpha}^{\dagger} a_{0 \beta}^{\dagger}  \ket{\mathrm{vac}}$, 
+$\ket{01} = a_{0 \alpha}^{\dagger} a_{1 \beta}^{\dagger}  \ket{\mathrm{vac}}$, 
+$\ket{10} = a_{1 \alpha}^{\dagger} a_{0 \beta}^{\dagger}  \ket{\mathrm{vac}}$, 
+$\ket{11} = a_{1 \alpha}^{\dagger} a_{1 \beta}^{\dagger}  \ket{\mathrm{vac}}$, 
+The Hartree-Fock state for this Hamiltonian is $\ket{\Phi_0} = \ket{00}$.
+The \methodabbr parameters used in evaluating one matrix element are set, with the time grid $\Delta t = 0.1$, the number of Trotter step(s) $m=1$. A normalized symmetry-adapted Krylov basis reference state is given by $\ket{\Phi_1}= (\ket{01} + \ket{10} ) / \sqrt{2}$. 
+We show the Hadamard test circuit with one-step Trotter-Suzuki approximation for estimating $\braket{\Phi_1  | e^{-i \Delta t \hat{H}_q }  |  \Phi_1} = \braket{X+iY}_\mathrm{anc}$ in Fig.~\ref{h2_cir}, which will measure $\braket{Y}$ on the ancilla. Substituting the final $U2(\pi/2, -\pi/2)$ gate with Hadamard gate will give $\braket{X}$. 
+\begin{figure}[h!]
+\centering
+\includegraphics[width=6.5in]{figs/phi1_cir4y.pdf}
+\caption{The circuit to compute matrix element $\braket{\Phi_1  | e^{-i \Delta t \hat{H}_q}  |  \Phi_1}$ using \texttt{Qiskit}. \textbf{q[0]}, \textbf{q[1] }encode basis states for the Hamiltonian, while \textbf{q[2]} is the ancillary qubit, with \textbf{c3} the classical bit to store the output from measuring \textbf{q[2]}. $U2(\pi/2, -\pi/2)$ gate before the measurement is the $H_k$ gate rotating the state of ancillary qubit into the $\sigma^Y$ basis.  }
+\label{h2_cir}
 \end{figure}
 
 
