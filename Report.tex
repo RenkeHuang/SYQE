@@ -15,7 +15,7 @@
 \usepackage{amsmath}
 \usepackage{newtxtext,newtxmath}
 
-
+\usepackage{svg}
 \usepackage{graphicx}
 \usepackage{dcolumn}
 \usepackage{braket}
@@ -239,7 +239,7 @@ where $\alpha, \beta \in [0,1,...,s]$, $I, J \in [0,1,...,d-1]$, indices are con
 %%%%%%%%%%%%%%%%
 \subsection{State Preparation} 
 
-Given a qubit Hamiltonian after the Jordan-Wigner\cite{jordan1993paulische} or the Bravyi-Kitaev encoding,\cite{Seeley:2012em} in general, not all terms (tensor products of Pauli operators) in the Hamiltonian commute.
+Given a qubit Hamiltonian after the Jordan-Wigner\cite{jordan1993paulische} or the Bravyi-Kitaev encoding,\cite{Bravyi2002, Seeley:2012em} in general, not all Pauli terms (tensor products of Pauli operators) in the Hamiltonian commute.
 \begin{equation}
 \hat{H}=E_{0}+\sum_{l}^{N} h_{l} \bigotimes_{k=1}^{n} \sigma_{k}^{\{I, X, Y, Z\}}
 \end{equation}
@@ -277,7 +277,7 @@ H_{\gamma \chi}
 ( \prod_{l} e^{- i \frac{\beta \Delta t h_{l}}{m}  \hat{P}_l  } )^{m}   \;    \hat{U}_J  |  \bar{0}  } 
 = E_0 \braket{\bar{0} | \hat{U}_\gamma^{\dagger}  \hat{U}_\chi  |  \bar{0}  }  +\sum_l^N   h_l  \braket{\bar{0} | \hat{U}_\gamma^{\dagger} \,  \hat{P}_l   \,  \hat{U}_\chi  |  \bar{0}  }
 \end{align}
-$\hat{U}_I$, $\hat{U}_J$ are unitary oracles that output reference states. For a single determinant (one computational basis state), $\hat{U}_{\{I,J\}}$ comprises one layer of X gates. Protocols for constructing multi-determinant states are proposed\cite{Sugisaki:2016kx, Tubman:2018wz} with linear scaling in the number of qubits. 
+$\hat{U}_I$, $\hat{U}_J$ are unitary oracles that output reference states. For a single determinant (one computational basis state), $\hat{U}_{\{I,J\}}$ comprises one layer of X gates. Protocols for constructing multi-determinant states are proposed\cite{Sugisaki:2016kx, Tubman:2018wz, Sugisaki:2019fz} with linear scaling in the number of qubits. 
 In the most general case when matrix elements are between basis states that evolve from different references $\ket{\Phi_I}$, $\ket{\Phi_J}$, we need to implement the controlled reference oracles $\controlop{\hat{U}_{\{I,J\}}}$, which have two-qubit gates at the same scaling as single-qubit gates in $\hat{U}_{\{I,J\}}$.
 While for matrix elements between states from the same reference $\ket{\Phi_I}$, we simplify Eq. \ref{s_reform}, \ref{h_reform} as $S_{\gamma \chi}=\braket{\Phi_I |  \hat{U}_\alpha^{\dagger}  \hat{U}_\beta  |  \Phi_I  }$,
 $H_{\gamma \chi}=E_0 \braket{\Phi_I |  \hat{U}_\alpha^{\dagger}  \hat{U}_\beta  |  \Phi_I  }  + \sum_l h_l \braket{\Phi_I |  \hat{U}_\alpha^{\dagger}  \hat{U}_\beta  |  \Phi_I  }$,
@@ -306,7 +306,16 @@ and $e^{-i t_{l}  \sigma_{n}^Z}  = R_z(2t_l)$ represents the $Z$ rotation gate o
 
 For applying $e^{-i t_{l} \otimes_{k} \sigma_{k}}$ on the main register controlled by the ancillary qubit, we only need to replace the $R_z(2t_l)$ with a controlled $R_z(2t_l)$ on the last qubit. In this way, $l$ terms in a single Trotter step are executed sequentially. For larger Trotter number $m$, we just run $m$ replicas of $l$-terms in series.
 
-To give readers an idea of how to construct such circuits in practice, we demonstrate an example circuit to compute one matrix element for a two-qubit molecular \ce{H2} Hamiltonian\cite{OMalley:2016dc} using the spin-preserved Bravyi-Kitaev transformation,\cite{Seeley:2012em, Bravyi:2017wb} at the bond length of 0.75 \AA. Coefficients $h_l$ are computed in STO-3G basis given in Table I of the supplementary information of Ref.~\citenum{Colless:2018hp}. 
+\begin{figure}[h!]
+  \centering
+  %\includesvg{phi01_cir4y.svg}
+  \includegraphics[width=6.5in]{figs/phi1_cir4y.pdf}
+  \includegraphics[width=6.5in]{figs/phi0+e1_cir_y.pdf}
+  \caption{The circuit to compute $\braket{\Phi_1  | e^{-i \Delta t \hat{H}_q}  |  \Phi_1}$ (top) and $\braket{\Phi_0  | e^{i \Delta t \hat{H}_q}  |  \Phi_1}$ (bottom) implemented using \texttt{Qiskit}\cite{Qiskit}. \textbf{q[0]}, \textbf{q[1] }encode basis states for the Hamiltonian, while \textbf{q[2]} is the ancillary qubit, with \textbf{c3} the classical bit to store the output from measuring \textbf{q[2]}. $U2(\pi/2, -\pi/2)$ gate before the measurement is the $H_k$ gate rotating the state of ancillary qubit into the $\sigma^Y$ basis.  }
+\label{h2_cir}
+\end{figure}
+
+To give readers an idea of how to construct such circuits in practice, we demonstrate an example circuit to compute several matrix elements for a two-qubit molecular \ce{H2} Hamiltonian\cite{OMalley:2016dc} using the spin symmetry-enforced Bravyi-Kitaev transformation,\cite{Moll_2016, Bravyi:2017wb} at the bond length of 0.75~\AA{}. Coefficients $h_l$ are computed in STO-3G basis given in Table I of the supplementary information of Ref.~\citenum{Colless:2018hp}. 
 \begin{equation}
 \hat{H}_q = -0.349833 - 0.388748\sigma_0^Z  + 0.181771\sigma_0^X \sigma_1^X - 0.388748 \sigma_1^Z + 0.011177\sigma_0^Z \sigma_1^Z
 \end{equation}
@@ -316,21 +325,55 @@ $\ket{01} = a_{0 \alpha}^{\dagger} a_{1 \beta}^{\dagger}  \ket{\mathrm{vac}}$,
 $\ket{10} = a_{1 \alpha}^{\dagger} a_{0 \beta}^{\dagger}  \ket{\mathrm{vac}}$, 
 $\ket{11} = a_{1 \alpha}^{\dagger} a_{1 \beta}^{\dagger}  \ket{\mathrm{vac}}$, 
 The Hartree-Fock state for this Hamiltonian is $\ket{\Phi_0} = \ket{00}$.
-The \methodabbr parameters used in evaluating one matrix element are set, with the time grid $\Delta t = 0.1$, the number of Trotter step(s) $m=1$. A normalized symmetry-adapted Krylov basis reference state is given by $\ket{\Phi_1}= (\ket{01} + \ket{10} ) / \sqrt{2}$. 
-We show the Hadamard test circuit with one-step Trotter-Suzuki approximation for estimating $\braket{\Phi_1  | e^{-i \Delta t \hat{H}_q }  |  \Phi_1} = \braket{X+iY}_\mathrm{anc}$ in Fig.~\ref{h2_cir}, which will measure $\braket{Y}$ on the ancilla. Substituting the final $U2(\pi/2, -\pi/2)$ gate with Hadamard gate will give $\braket{X}$. 
-\begin{figure}[h!]
-\centering
-\includegraphics[width=6.5in]{figs/phi1_cir4y.pdf}
-\caption{The circuit to compute matrix element $\braket{\Phi_1  | e^{-i \Delta t \hat{H}_q}  |  \Phi_1}$ using \texttt{Qiskit}. \textbf{q[0]}, \textbf{q[1] }encode basis states for the Hamiltonian, while \textbf{q[2]} is the ancillary qubit, with \textbf{c3} the classical bit to store the output from measuring \textbf{q[2]}. $U2(\pi/2, -\pi/2)$ gate before the measurement is the $H_k$ gate rotating the state of ancillary qubit into the $\sigma^Y$ basis.  }
-\label{h2_cir}
-\end{figure}
+A normalized spin adapted Krylov basis reference state is given by $\ket{\Phi_1}= (\ket{01} + \ket{10} ) / \sqrt{2}$.
+The \methodabbr parameters used in evaluating one matrix element are set, with the time grid $\Delta t = 0.1$, the number of Trotter step(s) $m=1$.  
+We take two off-diagonal matrix elements as examples, which are overlaps between Krylov basis state $\ket{\Phi_1}$ and $e^{-i \Delta t \hat{H}_q }  \ket{\Phi_1}$, $e^{-i \Delta t \hat{H}_q }  \ket{\Phi_0}$ and $\ket{\Phi_1}$.
+Hadamard test circuits with one-step Trotter-Suzuki approximation to compute $\braket{\Phi_1  | e^{-i \Delta t \hat{H}_q}  |  \Phi_1}$ and $\braket{\Phi_0  | e^{i \Delta t \hat{H}_q}  |  \Phi_1}$
+by estimating $\braket{X+iY}_\mathrm{anc}$ are shown in Fig.~\ref{h2_cir}, where the ancilla qubit is measured to obtain $\braket{Y}$.
+Substituting the final $U2(\pi/2, -\pi/2)$ gates with Hadamard gates in two circuits will give $\braket{X}$. 
 
 
 %%%%%%%%%%%%%%%%
 \subsection{Cost Estimation}
 
+The quantum resource cost in the \methodabbr method is dominated by the number of two-qubit gates in the controlled Hamiltonian exponentials, especially the CNOT gates. 
+Here we present a rough estimate of the gate counts in measuring matrix elements at the minimal Trotter step ($m=1$), summarized in Table~\ref{cost_table}. 
+The layer counting follows the rule that the set of gates that can be executed concurrently in parallel contributes one layer of the circuit.
+In the $\controlop{e^{-i H t}}$ circuit we are interested in, the number of layers of single-qubit basis change gates $H_k$ are roughly half of the 1-qubit gate counts. For two-qubit gates, each adds one layer to the circuit, because they need to run sequentially in the time order.
 
+Note that all the numbers in the table serve as upper bounds for the implementation in practice, because we analyze the case when the number of qubits is equal to the number of spin orbitals with the active space spanning the whole molecular orbital space. 
+Also, a direct application of the Jordan-Wigner transformation retains some redundant degrees of freedom in the qubit Hamiltonian and states.
+Other more advanced encoding techniques enable the quantum simulation with fewer qubits. 
+For example, Temme \textit{et al.}\cite{Bravyi:2017wb}  described a transform to remove qubits in the presence of $\mathbb{Z}_{2}$ symmetries.
+On the other hand, 
 
+\begin{table*}[!ht]
+\centering
+\renewcommand{\arraystretch}{1.1}
+\caption{
+Resource estimates for \methodabbr calculations with $m=1$ Trotter step approximation on several hydrogen systems in STO-6G basis at the bond length R=1.5 \AA.
+Jordan-Wigner transformation is used to encode the Hamiltonian for all cases in the table. 
+}
+\footnotesize
+\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}*{1}{r}*{8}{r}@{}}    %9: means 9 columns for right ones
+%\begin{tabular*}{\columnwidth}{| c | c | c | c | c | c | c |}    % \stretch{0.4}
+\hline
+\toprule
+\,  &  \ce{H2}  &   \ce{H4} (linear)  &  \ce{H_4} (ring)   &  \ce{H6} (linear)   &   \ce{H6} (ring)  &   \ce{H8} (linear)      \\
+\midrule
+ Num. of qubits   &  4   &   8   &   8   &   12   &  12   &   16  \\
+ Num. of Pauli terms   &  15    &   185    & 93       &  919     &  703     &  2913   \\ [3pt]
+ Num. of $H$/$R_{zy}$ ($H_k$) gates       &  16   &   480     &	 224    &   2832	&   2240     &   9664    \\
+ Num. of 1-qubit gate layers	                  &	  8     &   296     &	 112    &  1680	&   1248     &   5552         \\[3pt]
+ Num. of CNOT gates                                &  36    &  1328   &  520      &  9972     &  7476      & 41600    \\
+ Num. of $\controlop{R_z}$ gates           &  14    &  184     &    92       &  918       &   702       &  2912   \\  [3pt]
+ Num. of total layers                                   &  58    &  1808  &    724     &  12570   &   9426    &  50064 \\
+\bottomrule
+\hline
+
+\end{tabular*}
+\label{cost_table}
+\end{table*}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -346,7 +389,7 @@ Chemical accuracy can be achieved using a Trotter number of 4 and 20 Krylov basi
 \centering
 \renewcommand{\arraystretch}{1.1}
 \caption{Ground-state energies (in \Eh) of \ce{H6} at a bond distance of 1.5~\AA{}. \methodabbr results are given for $N = d (s+1)$ Krylov basis states using three steps ($s = 3$) and $\Delta t = 0.5$ a.u.
-The quantity $m$ indicates the Trotter number.
+$m$ indicates the Trotter number.
 Subscripts denote different ordering type of Pauli terms in the qubit Hamiltonian after the Trotterization. 
 \textbf{OF}: OpenFermion's default QubitOperator ordering; 
 \textbf{JW-d}: terms are sorted in the descending order based on the magnitude of coefficients after Jordan-Wigner transform (Pauli term with largest magnitude goes first);
@@ -356,7 +399,6 @@ Subscripts denote different ordering type of Pauli terms in the qubit Hamiltonia
 \footnotesize
 \begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}*{1}{r}*{8}{r}@{}}    %9: means 9 columns for right ones
 %\begin{tabular*}{\columnwidth}{| c | c | c | c | c | c | c |}    % \stretch{0.4}
-
  \hline
  \toprule
      $N$    &    $E^{(m=1)}_{\rm{OF}}$    &    $E^{(m=1)}_{\rm{JW-d}}$    &    $E^{(m=1)}_{\rm{SQ-d}}$    &    $E^{(m=1)}_{\rm{rand}}$     &     $E^{(m=2)}_{\rm{OF}}$    &    $E^{(m=2)}_{\rm{JW-d}}$     &   $E^{(m=2)}_{\rm{SQ-d}}$    &     $E^{(m=2)}_{\rm{rand}}$       \\
@@ -375,16 +417,31 @@ Subscripts denote different ordering type of Pauli terms in the qubit Hamiltonia
   12    &   $-$3.016940   &    $-$3.017891    &   $-$3.018062    &   $-$3.016940      &   $-$3.018808    &   $-$3.018956    &   $-$3.019039    &   $-$3.018808  \\
   16    &   $-$3.017173   &    $-$3.017980    &   $-$3.018152    &   $-$3.017173      &   $-$3.018888    &   $-$3.019012    &   $-$3.019105    &   $-$3.018888  \\ 
   20    &    $-$3.017614  &    $-$3.019231    &   $-$3.019280    &   $-$3.017614     &    $-$3.019054   &    $-$3.019669   &    $-$3.019710     &    $-$3.019054   \\[3pt]
-  
 ~~~FCI       &  $-$3.020198    &   \textit{c.a. thres.}      &    $-$3.019198    \\% chemical accuracy
 \bottomrule
 \hline
-
 \end{tabular*}
-\label{table_GSE}
+\label{h6_gse_table}
 \end{table*}
 
+%%%% Error-N curve%%%%
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=4.5in]{figs/h6_error-N_order.pdf}
+  \caption{Energy error as a function of the number of Krylov basis states of \ce{H6} at a bond distance of 1.5~\AA.
+   }
+\label{h2_cir}
+\end{figure}
+%%%%%% PEC %%%%%%
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=3.2in]{figs/H6_pes_error.pdf}
+  \caption{Potential energy curve (top) and energy error (bottom) for symmetric dissociation of \textbf{linear \ce{H6}} in STO-6G basis.
+   }
+\label{h2_cir}
+\end{figure}
 
+%%%%%%%%%%% 1st-Excited States Table%%%%%%%%%%%%
 \begin{table*}[!ht]
 \centering
 \renewcommand{\arraystretch}{1.1}
@@ -392,22 +449,29 @@ Subscripts denote different ordering type of Pauli terms in the qubit Hamiltonia
 The quantity $m$ indicates the Trotter number.
 Subscripts denote the ordering type after the Trotterization. }
 \footnotesize
-\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}*{1}{r}*{9}{r}@{}}    %9: means 9 columns for right ones
-%\begin{tabular*}{\columnwidth}{| c | c | c | c | c | c | c |}    % \stretch{0.4}
-%\hline
-
+\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}*{1}{r}*{9}{r}@{}}    
  \toprule
-     $N$    &    $E^{(m=1)}_{\rm{OF}}$    &    $E^{(m=1)}_{\rm{JW-d}}$    &    $E^{(m=1)}_{\rm{FA-d}}$    &    $E^{(m=2)}_{\rm{OF}}$    &    $E^{(m=2)}_{\rm{JW-d}}$     &   $E^{(m=2)}_{\rm{FA-d}}$    &     $E^{(m=4)}_{\rm{OF}}$    &   $E^{(m=4)}_{\rm{JW-d}}$    &   $E^{(m=4)}_{\rm{FA-d}}$  \\
- \midrule
-    
-    
-FCI       &  $-$2.889922    &       \\
+     $N$     &    $E^{(m=2)}_{\rm{OF}}$    &    $E^{(m=2)}_{\rm{JW-d}}$     &   $E^{(m=2)}_{\rm{SQ-d}}$    &     $E^{(m=2)}_{\rm{rand}}$    &   $E^{(m=4)}_{\rm{OF}}$    &   $E^{(m=4)}_{\rm{JW-d}}$    &   $E^{(m=4)}_{\rm{SQ-d}}$    &    $E^{(m=4)}_{\rm{rand}}$  \\
+     \midrule
+  8      &   $-$2.813678   &    $-$2.822952   &    $-$2.819339   &   $-$2.813678     &   $-$2.854913    &   $-$2.851219   &   $-$2.850036   &   $-$2.854913  \\
+ 16       &   $-$2.822238   &    $-$2.847035   &    $-$2.842780  &   $-$2.822238     &   $-$2.859053    &   $-$2.867098   &   $-$2.865905   &   $-$2.859053  \\
+  24      &   $-$2.831772   &    $-$2.854135  &    $-$2.849167   &   $-$2.831772     &   $-$2.866840   &   $-$2.874047   &   $-$2.872074   &   $-$2.866840  \\
+  32      &   $-$2.844701   &    $-$2.860495   &    $-$2.856910   &   $-$2.844701     &   $-$2.870509    &   $-$2.878594   &   $-$2.877274   &   $-$2.870509  \\
+ \hline
+ \toprule
+  $N$    &     $E^{(m=8)}_{\rm{OF}}$    &   $E^{(m=8)}_{\rm{JW-d}}$    &   $E^{(m=8)}_{\rm{SQ-d}}$   &   $E^{(m=8)}_{\rm{rand}}$   &     $E^{(m=100)}_{\rm{OF}}$    &   $E^{(m=100)}_{\rm{JW-d}}$    &   $E^{(m=100)}_{\rm{SQ-d}}$   &   $E^{(m=100)}_{\rm{rand}}$   \\
+  \midrule
+  8        &   $-$2.865878   &    $-$2.862217   &    $-$2.861961   &   $-$2.865878     &   $-$2.868958    &   $-$2.868574   &   $-$2.868583   &   $-$2.868958  \\
+  16      &   $-$2.870392  &    $-$2.873199   &    $-$2.873127   &   $-$2.870392     &   $-$2.874589    &   $-$2.876091   &   $-$2.876461   &   $-$2.874589  \\
+  24      &   $-$2.877971   &    $-$2.879774   &    $-$2.879015   &   $-$2.877971            &   $-$2.882155    &   $-$2.882154   &   $-$2.882124   &   $-$2.882155  \\
+  32      &   $-$2.880205   &    $-$2.883214   &    $-$2.882670   &   $-$2.880205           &   $-$2.884504   &   $-$2.884840    &   $-$2.884817   &   $-$2.884504  \\[3pt] 
+~~~FCI       &  $-$2.889922         \\  % -2.888328 
 \bottomrule
-
+\hline
 \end{tabular*}
-\label{table_1ESE}
+\label{h6_iese_table}
 \end{table*}
-
+%%%%%%%%%%% END 1st-Excited States Table%%%%%%%%%%%%
 
 
 
