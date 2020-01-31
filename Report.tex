@@ -488,11 +488,10 @@ Notations are consistent with those in Table~\ref{h6_gse_table}.}
 Table~\ref{h6_gse_table} shows the ground-state energies from \methodabbr computations with the Trotter number $m$ of 1, 2, 4, 8, and four ordering strategies for linear \ce{H6} at a bond length of 1.5~\AA.
 We observe that chemical accuracy (error less than 1 kcal mol$^{-1}$ = 1.594 m\Eh) can be reached fastest if \textbf{sq} ordering is used. 
 For example, when $m=4$, \methodabbr using \textbf{sq} ordering gives an error of 0.917~m\Eh with 20 Krylov basis states, while \textbf{JW} ordering gives 0.967~m\Eh, and both the \textbf{OF} and \textbf{rand} ordering have a much larger error of 2.584~m\Eh.
-Fig.~\ref{h6_error-N} 
-% We report 
-%Different ordering of Pauli terms are tested.
-%Chemical accuracy can be achieved using a Trotter number of 4 and 20 Krylov basis states.
-
+To see the effect of ordering clearly, we compare the energy errors with respect to FCI for different orderings in several Trotter number $m$ as a function of the number of Krylov basis states $N$, displayed in Fig.~\ref{h6_error-N}.
+It is clear to find two patterns of asymptotic convergences. For this specific \ce{H6} geometry, \textbf{sq} and \textbf{JW} ordering always converge faster than \textbf{OF} and \textbf{rand} ordering. 
+While there is a small difference between \textbf{sq} energies and \textbf{JW}  energies, numbers of \textbf{OF} and \textbf{rand}  are exactly the same to at least 6 decimals. 
+Other random orderings are also tested (not shown), but all of them give the same results as \textbf{OF} and \textbf{rand} energies reported in Table~\ref{h6_gse_table}.
 %%%% Error-N curve%%%%
 \begin{figure}[h!]
   \centering
@@ -501,6 +500,11 @@ Fig.~\ref{h6_error-N}
    }
 \label{h6_error-N}
 \end{figure}
+%%%%%%%%%%%%%%%%
+
+Next, we examine how the effect of ordering might be change with different bond distances. Figure \ref{h6_pes} and Figure \ref{beh2_pes} show the potential energy curves (PEC) for \ce{H6} and \ce{BeH2}. For \methodabbr results, only \textbf{sq} and \textbf{rand} energies are plotted because they already well represent two asymptotic patterns.
+
+We find that for \ce{H6} chain, the optimality of \textbf{sq} is consistent throughout the entire PEC (bond length from 0.6~\AA{}  to 2.0~\AA), which can be seen that the \textbf{sq} curves are always below the \textbf{rand} curves for these small Trotter number $m=1, 2, 4, 8$.
 %%%%%% PES-H6 %%%%%%
 \begin{figure}[h!]
   \centering
@@ -513,9 +517,9 @@ Fig.~\ref{h6_error-N}
    }
 \label{h6_pes}
 \end{figure}
+%%%%%%%%%%%%%%%%%
 
-
-%%%%%% PEC-H6 %%%%%%
+%%%%%% PEC-BeH2 %%%%%%
 \begin{figure}[h!]
   \centering
   \includegraphics[width=3.2in]{figs/BeH2_pes_error.pdf}
@@ -527,22 +531,24 @@ Fig.~\ref{h6_error-N}
    }
 \label{beh2_pes}
 \end{figure}
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+By scrutinizing the error plot, we observe some small discontinuities in the \textbf{sq} curves but none in the \textbf{rand} curves, which results from the fact that the optimal Trotter ordering varies with the bond length.\cite{tranter2019ordering}
+
+The ordering effect in the PEC of \ce{BeH2} is much involved. In this case, the optimal ordering is not consistent when varying bond distances.
+Most of the case \textbf{rand} ordering performs better, in both the energy error and the discontinuity problem. The \textbf{sq} ordering also suffer from the problem of slow convergence of energy with respect to the Trotter number $m$. We run the PEC calculations using a very large $m$ of 100, and surprisingly find that for \textbf{sq} ordering, the $m=100$ plot overlaps with $m=8$ plot entirely. This numerical observation is not well understood, thus requires further interrogation, which remains for future work.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
 
 
-\section{Future Work}
+%\section{Future Work}
 
 
 
 
 \newpage
 \bibliographystyle{achemso}
-\bibliography{bibs/jan27export.bib,bibs/extra.bib,bibs/qkdrefs.bib}{}
+\bibliography{bibs/jan31export.bib,bibs/extra.bib,bibs/qkdrefs.bib}{}
 
 \end{document}
 
